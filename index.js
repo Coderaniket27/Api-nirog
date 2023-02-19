@@ -23,10 +23,33 @@ mongoose.connect(mongoURI, {
   })
 
 app.get('/', (req, res) => {
-    res.send('Hello World Aniket!')
+    res.send('Hello World Aniket boss!')
   })
-  app.get('/hero', (req, res) => {
-    res.send('Hero beta!')
+  app.get('/find', async (req, res) => {
+    
+   
+    try {
+         search= await FormModel.find()
+        if(!search){
+            return res.send({
+                message:"enter email"
+            })
+        }
+        else{
+            return res.send({
+                message:"great api",
+                data:search
+            })
+        }}
+        catch(err){
+            console.log(err)
+            return res.send({
+                message:"err"
+            })
+        }
+
+
+
   })
   app.post('/register', async (req, res) => {
     console.log(req.body);
