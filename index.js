@@ -6,6 +6,8 @@ var validator = require("email-validator");
 
 
 const FormModel = require('./FormModel.js');
+const FormModels = require('./FormData.js');
+
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors())
@@ -139,19 +141,32 @@ if(email)
 })
 
 app.post('/update', async(req, res) => {
-    let name = req.body.name;
+    let phone = req.body.phone;
     let newData = req.body.newData;
+    console.log(req.body)
 
     try {
 
-        let oldData = await FormModel.findOneAndUpdate({name: name}, newData);
+        let oldData = await FormModel.findOneAndUpdate({phone: phone}, newData);
+        console.log(oldData)
 console.log(newData)
-        res.send({
+if(oldData){
+       return  res.send({
             status: 200,
-            message: "Updated data successfully",
+            message: "Updated data successfully bro",
             data: oldData
         })
     }
+    else{
+        return res.send({
+            message:"enter data",
+            status:400
+        })
+    }
+}
+
+   
+
     catch(err) {
         res.send({
             status: 400,
@@ -249,6 +264,86 @@ app.get('/dash', async(req, res) => {
     
 
 })
+
+app.post('/dashboard', async (req, res) => {
+    console.log(req.body);
+    const {  name, phone,address,pincode,status,date } = req.body;
+
+    if( !name || !phone ||!address||!pincode||!status||!date) {
+        return res.send({
+            status: 400,
+            message: "Missing data",
+            data: req.body
+        })
+    }
+
+    
+    
+
+ 
+    // Write into DB
+        
+let form = new FormModels({
+    name: name,
+    phone: phone,
+    address:address,
+    pincode:pincode,
+    status:status,
+    date:date,
+    
+
+})
+try {
+    
+    let formData = await form.save();
+
+    console.log(formData);
+
+    res.send({
+        status: 200,
+        message: "Form Submmitted Successfully",
+        data: formData
+    });
+}
+catch(err) {
+    console.log(err)
+    res.send({
+        status: 400,
+        message: "Database error hai deho",
+        error: err
+    })
+}
+
+})
+
+app.get('/finddata/:date', async (req, res) => {
+    
+   let date=req.params;
+
+    try {
+         search= await FormModels.find(date)
+        if(!search){
+            return res.send({
+                message:"enter email"
+            })
+        }
+        else{
+            return res.send({
+                message:"great api",
+                data:search
+            })
+        }}
+        catch(err){
+            console.log(err)
+            return res.send({
+                message:"err"
+            })
+        }
+
+
+
+  })
+
     app.listen(port, () => {
     console.log(`Example app listening  aniket at http://localhost:${port}`)
   })
