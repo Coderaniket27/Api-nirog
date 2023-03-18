@@ -318,7 +318,6 @@ if(oldData){
 try {
     if(Email===email && pass==Pass){
         req.session.isAuths = true;
-        localStorage.setItem("Login", "True")
 
         return res.send({
            status:"200",
@@ -337,6 +336,8 @@ try {
     
 }
     catch(err){
+        console.log(err)
+
         return res.send({
             message:"see problem"
         })
