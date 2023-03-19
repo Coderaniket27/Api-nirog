@@ -102,7 +102,7 @@ app.get('/', (req, res) => {
 
 
   })
-  app.post('/cardregister', isAuth, async (req, res, next) => {
+  app.post('/register', isAuth, async (req, res, next) => {
     console.log(req.body);
    
     const {name, phone, email,address,query} = req.body;
@@ -185,11 +185,11 @@ if(email)
         })
     }
 })
-  app.post('/register', async (req, res) => {
+  app.post('/cardregister', async (req, res) => {
     console.log(req.body);
-    const {  name, phone, email,address,query } = req.body;
-
-    if( !name || !phone ||!address||!query) {
+    const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
+try {
+    if( !name || !phone ||!address||!aadhar||!date||!member) {
         return res.send({
             status: 400,
             message: "Missing data",
@@ -201,33 +201,45 @@ if(email)
     
 
     
-if(query.length && address.length <5){
+if(aadhar.length !="12"){
     return res.send({
         status: 400,
-        message: "Invalid query or address",
-        data: red.body
+        message: "Invalid aadhar no",
+        data: req.body
+    })
+}
+}
+catch(err) {
+    console.log(err)
+    res.send({
+        status: 400,
+        message: "Database error hai deho",
+        error: err
     })
 }
     // Write into DB
         try {
-            let email =req.body.email;
-            if(validator.validate(email)){
-            let formDs = await FormModel.findOne({email:email})
+            let aadhar =req.body.aadhar;
+            let member= req.body.member
+            
+            let formDs = await FormModel.findOne({aadhar:aadhar})
+
             console.log("hello kavya .......");
             if(formDs) {
                 return res.send({
                     status: 401,
-                    message: "email or no already taken please use another name"
+                    message: " Aadhar  already Registered"
                 })
             }
-        }
-        else{
-
-            return res.send({
-                status:400,
-                message: "email is not valid"
-            })
-        }
+            let formMember = await FormModel.findOne({member:member})
+            if(formMember) {
+                return res.send({
+                    status: 401,
+                    message: " membership ID already Registered"
+                })
+            }
+        
+       
     }
 catch(err){
     console.log(err)
@@ -240,16 +252,18 @@ catch(err){
 }
 let formData = new FormModel({
     name: name,
-
+     pincode:pincode,
     phone: phone,
-    query:query,
-    address:address
+    aadhar:aadhar,
+    address:address,
+    date:date,
+    email:email,
+    member:member
     
 
 })
 
-if(email)
-    formData.email = email;
+
     try {
     
         let formDb = await formData.save();
@@ -266,7 +280,7 @@ if(email)
         console.log(err)
         res.send({
             status: 400,
-            message: "Database error hai deho",
+            message: "Database error ",
             error: err
         })
     }
@@ -354,19 +368,20 @@ try {
 
 
 
-app.get('/dash', async(req, res) => {
-    let email = req.body.email;
+app.post('/dash', async(req, res) => {
+    let aadhar = req.body.aadhar;
     let search
     try {
-         search= await FormModel.findOne({email:email})
+         search= await FormModel.findOne({aadhar:aadhar})
         if(!search){
             return res.send({
-                message:"enter email"
+                message:"enter correct aadhar no"
             })
         }
         else{
             return res.send({
-                message:"great api",
+                status:"200",
+                message:"card downloaded",
                 data:search
             })
         }}

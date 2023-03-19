@@ -2,9 +2,18 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const formSchema = new Schema({
-    query: {
+    aadhar: {
         type: String,
         
+    },
+    member: {
+        type: String,
+    },
+    pincode: {
+        type: String,
+    },
+    date: {
+        type: String,
     },
     phone: {
         type: String,
@@ -17,14 +26,11 @@ const formSchema = new Schema({
         type:String,
     },
     email: {
-        type: String
-    },
-    password: {
         type: String,
-        //required: true
     },
+   
     
    
 })
 
-module.exports = mongoose.model('Forms', formSchema);
+module.exports = mongoose.model('cardData', formSchema);
