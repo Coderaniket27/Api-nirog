@@ -59,7 +59,20 @@ app.get('/', (req, res) => {
   })
   
   app.post('/logout', (req,res) =>{
-    req.session.destroy()
+    try{
+        req.session.destroy()
+   res.send({
+    status:200,
+    message:"Log out successfully"
+   })
+    }
+    catch(err){
+        res.send({
+            status: 400,
+            message: "Database error hai deho",
+            error: err
+        })
+    }
   })
   app.post('/register', isAuth, async (req, res, next) => {
     console.log(req.body);
