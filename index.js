@@ -25,7 +25,7 @@ const isAuth =(req,res,next) =>{
 }
 const database = new MongoDBSession({
     uri:mongoURI,
-    collection: "mySessi"
+    collection: "Session"
 
 })
 app.use(session({secret: "Shh, its a secret!",
