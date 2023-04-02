@@ -50,7 +50,6 @@ mongoose.connect(mongoURI, {
   })
 
 app.get('/', (req, res) => {
-    req.session.isAuths = true;
 
     res.send('Hello World Aniket boss!')
   })
@@ -58,49 +57,9 @@ app.get('/', (req, res) => {
       req.session.destroy()
     res.send('Hello World Aniket !')
   })
-  app.get('/great', (req, res) => {
-    try {
-        if(req.session.isAuths==true){
-            res.send("good")
-        }
-        else{
-            res.send("please hit")
-        }
-    }
-    catch(err){
-        console.log(err)
-        return res.send({
-            message:"err"
-        })
-    }
-
-  })
-
-  app.get('/find', async (req, res) => {
-    
-   
-    try {
-         search= await FormModel.find()
-        if(!search){
-            return res.send({
-                message:"enter email"
-            })
-        }
-        else{
-            return res.send({
-                message:"great api",
-                data:search
-            })
-        }}
-        catch(err){
-            console.log(err)
-            return res.send({
-                message:"err"
-            })
-        }
-
-
-
+  
+  app.post('/logout', (req,res) =>{
+    req.session.destroy()
   })
   app.post('/register', isAuth, async (req, res, next) => {
     console.log(req.body);
@@ -185,7 +144,7 @@ if(email)
         })
     }
 })
-  app.post('/cardregister', async (req, res) => {
+  app.post('/cardregister', isAuth, async (req, res) => {
     console.log(req.body);
     const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
 try {
@@ -224,7 +183,7 @@ catch(err) {
             
             let formDs = await FormModel.findOne({aadhar:aadhar})
 
-            console.log("hello kavya .......");
+        
             if(formDs) {
                 return res.send({
                     status: 401,
@@ -286,41 +245,41 @@ let formData = new FormModel({
     }
 })
 
-app.post('/update', async(req, res) => {
-    let phone = req.body.phone;
-    let newData = req.body.newData;
-    console.log(req.body)
+// app.post('/update', async(req, res) => {
+//     let phone = req.body.phone;
+//     let newData = req.body.newData;
+//     console.log(req.body)
 
-    try {
+//     try {
 
-        let oldData = await FormModel.findOneAndUpdate({phone: phone}, newData);
-        console.log(oldData)
-console.log(newData)
-if(oldData){
-       return  res.send({
-            status: 200,
-            message: "Updated data successfully bro",
-            data: oldData
-        })
-    }
-    else{
-        return res.send({
-            message:"enter data",
-            status:400
-        })
-    }
-}
+//         let oldData = await FormModel.findOneAndUpdate({phone: phone}, newData);
+//         console.log(oldData)
+// console.log(newData)
+// if(oldData){
+//        return  res.send({
+//             status: 200,
+//             message: "Updated data successfully bro",
+//             data: oldData
+//         })
+//     }
+//     else{
+//         return res.send({
+//             message:"enter data",
+//             status:400
+//         })
+//     }
+// }
 
    
 
-    catch(err) {
-        res.send({
-            status: 400,
-            message: "Database Error",
-            error: err
-        })
-    }
-  })
+//     catch(err) {
+//         res.send({
+//             status: 400,
+//             message: "Database Error",
+//             error: err
+//         })
+//     }
+//   })
   app.post('/login', async (req,res) => {
     let email = "prakashaniket3@gmail.com"
     let pass="12345678"
@@ -368,7 +327,7 @@ try {
 
 
 
-app.post('/dash', async(req, res) => {
+app.post('/downloadcard', async(req, res) => {
     let aadhar = req.body.aadhar;
     let search
     try {
