@@ -2,9 +2,7 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
-const cor = require('micro-cors')({
-    origin: 'https://api-nirog.vercel.app'
-  });
+
 
 var validator = require("email-validator");
 const jwt = require('jsonwebtoken');
@@ -15,8 +13,10 @@ const FormModelss= require('./FormRegister')
 
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
-app.use(cors(corsOptions))
-const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
+app.use(cors({
+    origin: 'https://nirog-admin.vercel.app'
+  }));
+  const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
 
 
 const port = process.env.PORT || 3001
