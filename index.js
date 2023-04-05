@@ -2,7 +2,9 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
-const cor = require('micro-cors')();
+const cor = require('micro-cors')({
+    origin: 'https://api-nirog.vercel.app'
+  });
 
 var validator = require("email-validator");
 const jwt = require('jsonwebtoken');
@@ -10,9 +12,7 @@ const secret='i love something which i dont know'
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
 const FormModelss= require('./FormRegister')
-const corsOptions = {
-    origin: 'https://api-nirog.vercel.app',
-  };
+
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors(corsOptions))
@@ -332,7 +332,7 @@ let formData = new FormModel({
 //         })
 //     }
 //   })
-module.exports = cors(app.post('/login', async (req, res) => {
+module.exports = cor(app.post('/login', async (req, res) => {
     // You should validate the user's credentials before generating the token
     res.setHeader('Access-Control-Allow-Origin', '*');
     const email=req.body.email;
