@@ -8,10 +8,12 @@ const secret='i love something which i dont know'
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
 const FormModelss= require('./FormRegister')
-
+const corsOptions = {
+    origin: 'https://api-nirog.vercel.app',
+  };
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
-app.use(cors())
+app.use(cors(corsOptions))
 const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
 
 
