@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
+const cor = require('micro-cors')();
+
 var validator = require("email-validator");
 const jwt = require('jsonwebtoken');
 const secret='i love something which i dont know'
@@ -330,13 +332,13 @@ let formData = new FormModel({
 //         })
 //     }
 //   })
-app.post('/login', async (req, res) => {
+module.exports = cors(app.post('/login', async (req, res) => {
     // You should validate the user's credentials before generating the token
-   
+    res.setHeader('Access-Control-Allow-Origin', '*');
     const email=req.body.email;
     const password=req.body.password;
     
-
+    if (req.method === 'POST') {
       try{
 
         const user = {
@@ -382,7 +384,8 @@ catch(err){
         message:"err"
     })
 }
-  });
+    }
+  }));
 app.get('/dash', async(req, res) => {
     let email = req.body.email;
     let search
