@@ -3,42 +3,44 @@ const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
 var validator = require("email-validator");
-const session = require('express-session');
-const MongoDBSession= require('connect-mongodb-session')(session);
-
+const jwt = require('jsonwebtoken');
+const secret='i love something which i dont know'
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
+const FormModelss= require('./FormRegister')
 
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors())
 const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
-const isAuth =(req,res,next) =>{
-    if(req.session.isAuths){
-        next();
-    }
-    else{
-        res.send({
-            message:"jare login kar"
-        })
-    }
-}
-const database = new MongoDBSession({
-    uri:mongoURI,
-    collection: "Session"
 
-})
-app.use(session({secret: "Shh, its a secret!",
-resave: false,
-saveUninitialized: false,
-
-store: database,
-saveUninitialized:true,
-resave: false 
-}));
 
 const port = process.env.PORT || 3001
+function generateToken(user) {
+    const payload = {
+     
+        id: user.id,
+        email: user.email,
+    };
+    const options = { expiresIn: '1d' };
 
+    return jwt.sign(payload, secret, options);
+  }
+  
+  // This function will authenticate a user based on the JWT token
+  function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
+    if (!token) {
+      return res.send({ message: 'No token provided' });
+    }
+    try {
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.send({ message: 'Invalid token' });
+    }
+  }
 
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
@@ -53,11 +55,7 @@ app.get('/', (req, res) => {
 
     res.send('Hello World Aniket boss!')
   })
-  app.get('/check', (req, res) => {
-      req.session.destroy()
-    res.send('Hello World Aniket !')
-  })
-  
+ 
   app.post('/logout', (req,res) =>{
     try{
         req.session.destroy()
@@ -73,8 +71,45 @@ app.get('/', (req, res) => {
             error: err
         })
     }
+  }) 
+
+  
+  app.post('/adminregister', async(req,res) =>{
+
+     const email=req.body.email;
+     const password=req.body.password
+    try{
+         if(!email||!password){
+            res.send({
+                status:404,
+                message:"Missing data"
+               })
+         }
+         let formData = new FormModelss({
+            email:email,
+            password:password
+                 
+        })
+        let formDb = await formData.save();
+
+        console.log(formDb);
+
+        res.send({
+            status: 200,
+            message: "Form Submmitted Successfully",
+            pata: formDb
+        });
+    }
+    catch(err){
+        res.send({
+            status: 400,
+            message: "Database error hai deho",
+            error: err
+        })
+    }
   })
-  app.post('/register', isAuth, async (req, res, next) => {
+
+  app.post('/register',  async (req, res, next) => {
     console.log(req.body);
    
     const {name, phone, email,address,query} = req.body;
@@ -157,7 +192,7 @@ if(email)
         })
     }
 })
-  app.post('/cardregister', isAuth, async (req, res) => {
+  app.post('/cardregister',authenticate, async (req, res) => {
     console.log(req.body);
     const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
 try {
@@ -293,42 +328,81 @@ let formData = new FormModel({
 //         })
 //     }
 //   })
-  app.post('/login', async (req,res) => {
-    let email = "prakashaniket3@gmail.com"
-    let pass="12345678"
-    let Email=req.body.email;
-    let Pass=req.body.password;
-    console.log(pass)
-
-    
-try {
-    if(Email===email && pass==Pass){
-        req.session.isAuths = true;
-
-        return res.send({
-           status:"200",
-            message:"login"
-        })
-    }
-    else{
-       return res.send({
-           status:"400",
-        message: "please login"
-        })
-    }
-    
+app.post('/login', async (req, res) => {
+    // You should validate the user's credentials before generating the token
    
-   
+    const email=req.body.email;
+    const password=req.body.password;
     
+
+      try{
+
+        const user = {
+            id: 1,
+            email: email,
+          
+          };
+
+  // Check if email and password were provided in the request body
+  if (!email || !password) {
+    return res.send({ message: 'Please provide email and password',status:"404" });
+  }
+
+  // Find the user by email address in your database or data source
+   const search= await FormModelss.findOne({email:email})
+  if(!search ){
+    res.send({
+        message:"please enter valid email",
+        status:"404"
+    })
 }
-    catch(err){
-        console.log(err)
+    if(search.password!==password){
 
-        return res.send({
-            message:"see problem"
+        res.send({
+            message:"enter correct password",
+            status:"404"
+
         })
     }
+    const token = generateToken(user);
+  res.send({
+    message:"login success",
+    status:"200",
+    token:token
+  })
 
+  
+}
+catch(err){
+    console.log(err)
+    return res.send({
+        message:"err"
+    })
+}
+  });
+app.get('/dash', async(req, res) => {
+    let email = req.body.email;
+    let search
+    try {
+         search= await FormModel.findOne({email:email})
+        if(!search){
+            return res.send({
+                message:"enter email"
+            })
+        }
+        else{
+            return res.send({
+                message:"great api",
+                data:search
+            })
+        }}
+        catch(err){
+            console.log(err)
+            return res.send({
+                message:"err"
+            })
+        }
+    
 
 })
 
