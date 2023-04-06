@@ -2,18 +2,14 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
-const cor = require('micro-cors')();
 
+const secret="i love my ????"
 var validator = require("email-validator");
-const session = require('express-session');
-const MongoDBSession= require('connect-mongodb-session')(session);
+const jwt = require('jsonwebtoken');
 
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
-const FormModelss= require('./FormRegister')
-const corsOptions = {
-    origin: 'https://api-nirog.vercel.app',
-  };
+
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors())
@@ -32,7 +28,32 @@ mongoose.connect(mongoURI, {
      
     console.log('Connected to  congo database');
   })
+  function generateToken(user) {
+    const payload = {
+     
+        id: user.id,
+        email: user.email,
+    };
+    const options = { expiresIn: '1d' };
+
+    return jwt.sign(payload, secret, options);
+  }
   
+  // This function will authenticate a user based on the JWT token
+  function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    try {
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+  }
+
 app.get('/', (req, res) => {
 
     res.send('Hello World Aniket boss!')
@@ -58,7 +79,7 @@ app.get('/', (req, res) => {
         })
     }
   })
-  app.post('/register', isAuth, async (req, res, next) => {
+  app.post('/register',  async (req, res, next) => {
     console.log(req.body);
    
     const {name, phone, email,address,query} = req.body;
@@ -141,7 +162,7 @@ if(email)
         })
     }
 })
-  app.post('/cardregister', isAuth, async (req, res) => {
+  app.post('/cardregister',  async (req, res) => {
     console.log(req.body);
     const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
 try {
@@ -280,8 +301,10 @@ let formData = new FormModel({
 app.post('/login', async (req, res) => {
     // You should validate the user's credentials before generating the token
    
-    const email=req.body.email;
-    const password=req.body.password;
+    const email="prakashaniket3@gmail.com"
+    const password="12345678"
+    const Email=req.body.email
+    const Password=req.body.password
     
 
       try{
@@ -293,19 +316,19 @@ app.post('/login', async (req, res) => {
           };
 
   // Check if email and password were provided in the request body
-  if (!email || !password) {
+  if (!Email || !Password) {
     return res.send({ message: 'Please provide email and password',status:"404" });
   }
 
   // Find the user by email address in your database or data source
-   const search= await FormModelss.findOne({email:email})
-  if(!search ){
-    res.send({
-        message:"please enter valid email",
-        status:"404"
-    })
-}
-    if(search.password!==password){
+//    const search= await FormModelss.findOne({email:email})
+//   if(!search ){
+//     res.send({
+//         message:"please enter valid email",
+//         status:"404"
+//     })
+// }
+    if(Email!==email && Password!==password){
 
         res.send({
             message:"enter correct password",
