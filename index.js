@@ -328,7 +328,7 @@ app.post('/login', async (req, res) => {
 //         status:"404"
 //     })
 // }
-    if(Email!==email || Password!==password){
+    if( Password!==password){
 
         res.send({
             message:"enter correct password",
@@ -336,7 +336,9 @@ app.post('/login', async (req, res) => {
 
         })
     }
+
     const token = generateToken(user);
+    
   res.send({
     message:"login success",
     status:"200",
