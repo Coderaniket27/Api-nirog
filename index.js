@@ -301,10 +301,9 @@ let formData = new FormModel({
 app.post('/login', async (req, res) => {
     // You should validate the user's credentials before generating the token
    
-    const email="prakashaniket3@gmail.com"
-    const password="12345678"
-    const Email=req.body.email
-    const Password=req.body.password
+    
+    const email=req.body.email
+    const password=req.body.password
     
 
       try{
@@ -328,14 +327,12 @@ app.post('/login', async (req, res) => {
 //         status:"404"
 //     })
 // }
-    if( Password!=="12345678"){
+const validEmail = 'test@example.com';
+const validPassword = 'password123';
 
-        res.send({
-            message:"enter correct password",
-            status:"404"
-
-        })
-    }
+if (email !== validEmail || password !== validPassword) {
+  return res.status(401).json({ message: 'Invalid email or password' });
+}
 
     const token = generateToken(user);
     
