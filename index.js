@@ -328,7 +328,7 @@ app.post('/login', async (req, res) => {
 //         status:"404"
 //     })
 // }
-    if(Email!==email && Password!==password){
+    if(Email!==email || Password!==password){
 
         res.send({
             message:"enter correct password",
