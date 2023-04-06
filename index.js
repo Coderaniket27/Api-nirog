@@ -162,14 +162,14 @@ if(email)
         })
     }
 })
-  app.post('/cardregister',  async (req, res) => {
+  app.post('/cardregister', authenticate, async (req, res) => {
     console.log(req.body);
     const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
 try {
     if( !name || !phone ||!address||!aadhar||!date||!member) {
         return res.send({
             status: 400,
-            message: "Missing data",
+            message: "Missing data hai",
             data: req.body
         })
     }
