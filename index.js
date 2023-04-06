@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
-
+const cor = require('micro-cors')();
 
 var validator = require("email-validator");
 const session = require('express-session');
