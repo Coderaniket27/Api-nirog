@@ -331,7 +331,7 @@ const validEmail = 'prakashaniket3@gmail.com';
 const validPassword = 'password12345';
 
 if (email !== validEmail || password !== validPassword) {
-  return res.status(401).json({ message: 'Invalid email or password' });
+  return res.send({ message: 'Invalid email or password',status:"404" });
 }
 
     const token = generateToken(user);
