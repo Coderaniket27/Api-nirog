@@ -392,7 +392,9 @@ app.post('/downloadcard', async(req, res) => {
          search= await FormModel.findOne({aadhar:aadhar})
         if(!search){
             return res.send({
-                message:"enter correct aadhar no"
+
+
+                message:"enter correct aadhar number"
             })
         }
         else{
