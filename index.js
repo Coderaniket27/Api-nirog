@@ -16,10 +16,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors())
 const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
 
-store: database,
-saveUninitialized:true,
-resave: false 
-}));
+
 
 const port = process.env.PORT || 3001
 
