@@ -5,46 +5,24 @@ var cors = require('cors')
 
 
 var validator = require("email-validator");
-const jwt = require('jsonwebtoken');
-const secret='i love something which i dont know'
+const session = require('express-session');
+const MongoDBSession= require('connect-mongodb-session')(session);
+
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
-const FormModelss= require('./FormRegister')
 
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
-app.use(cors({
-    origin: 'https://nirog-admin.vercel.app'
-  }));
-  const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
+app.use(cors())
+const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
 
+store: database,
+saveUninitialized:true,
+resave: false 
+}));
 
 const port = process.env.PORT || 3001
-function generateToken(user) {
-    const payload = {
-     
-        id: user.id,
-        email: user.email,
-    };
-    const options = { expiresIn: '1d' };
 
-    return jwt.sign(payload, secret, options);
-  }
-  
-  // This function will authenticate a user based on the JWT token
-  function authenticate(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
-    if (!token) {
-      return res.send({ message: 'No token provided' });
-    }
-    try {
-      const decoded = jwt.verify(token, secret);
-      req.user = decoded;
-      next();
-    } catch (error) {
-      return res.send({ message: 'Invalid token' });
-    }
-  }
 
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
@@ -59,7 +37,11 @@ app.get('/', (req, res) => {
 
     res.send('Hello World Aniket boss!')
   })
- 
+  app.get('/check', (req, res) => {
+      req.session.destroy()
+    res.send('Hello World Aniket !')
+  })
+  
   app.post('/logout', (req,res) =>{
     try{
         req.session.destroy()
@@ -75,45 +57,8 @@ app.get('/', (req, res) => {
             error: err
         })
     }
-  }) 
-
-  
-  app.post('/adminregister', async(req,res) =>{
-
-     const email=req.body.email;
-     const password=req.body.password
-    try{
-         if(!email||!password){
-            res.send({
-                status:404,
-                message:"Missing data"
-               })
-         }
-         let formData = new FormModelss({
-            email:email,
-            password:password
-                 
-        })
-        let formDb = await formData.save();
-
-        console.log(formDb);
-
-        res.send({
-            status: 200,
-            message: "Form Submmitted Successfully",
-            pata: formDb
-        });
-    }
-    catch(err){
-        res.send({
-            status: 400,
-            message: "Database error hai deho",
-            error: err
-        })
-    }
   })
-
-  app.post('/register',  async (req, res, next) => {
+  app.post('/register', isAuth, async (req, res, next) => {
     console.log(req.body);
    
     const {name, phone, email,address,query} = req.body;
@@ -196,7 +141,7 @@ if(email)
         })
     }
 })
-  app.post('/cardregister',authenticate, async (req, res) => {
+  app.post('/cardregister', isAuth, async (req, res) => {
     console.log(req.body);
     const {  name, phone, email,address,aadhar,pincode,date,member } = req.body;
 try {
@@ -332,13 +277,13 @@ let formData = new FormModel({
 //         })
 //     }
 //   })
-module.exports = cor(app.post('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     // You should validate the user's credentials before generating the token
-    res.setHeader('Access-Control-Allow-Origin', '*');
+   
     const email=req.body.email;
     const password=req.body.password;
     
-    if (req.method === 'POST') {
+
       try{
 
         const user = {
@@ -369,7 +314,6 @@ module.exports = cor(app.post('/login', async (req, res) => {
         })
     }
     const token = generateToken(user);
-    res.setHeader('Access-Control-Allow-Origin', 'https://api-nirog.vercel.app');
   res.send({
     message:"login success",
     status:"200",
@@ -384,8 +328,7 @@ catch(err){
         message:"err"
     })
 }
-    }
-  }));
+  });
 app.get('/dash', async(req, res) => {
     let email = req.body.email;
     let search
