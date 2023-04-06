@@ -315,7 +315,7 @@ app.post('/login', async (req, res) => {
           };
 
   // Check if email and password were provided in the request body
-  if (!Email || !Password) {
+  if (!email || !password) {
     return res.send({ message: 'Please provide email and password',status:"404" });
   }
 
@@ -327,8 +327,8 @@ app.post('/login', async (req, res) => {
 //         status:"404"
 //     })
 // }
-const validEmail = 'test@example.com';
-const validPassword = 'password123';
+const validEmail = 'prakashaniket3@gmail.com';
+const validPassword = 'password12345';
 
 if (email !== validEmail || password !== validPassword) {
   return res.status(401).json({ message: 'Invalid email or password' });
