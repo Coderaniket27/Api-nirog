@@ -10,7 +10,10 @@ const MongoDBSession= require('connect-mongodb-session')(session);
 
 const FormModel = require('./FormModel.js');
 const FormModels = require('./FormData.js');
-
+const FormModelss= require('./FormRegister')
+const corsOptions = {
+    origin: 'https://api-nirog.vercel.app',
+  };
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors())
