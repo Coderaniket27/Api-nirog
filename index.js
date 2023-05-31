@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 var cors = require('cors')
+const { mongoURI } = require('./private-constant'); 
 
 const secret="i love my ????"
 var validator = require("email-validator");
@@ -13,7 +14,6 @@ const FormModels = require('./FormData.js');
 app.use(express.json()); // middleware
 app.use(express.urlencoded({extended: true})); 
 app.use(cors())
-const mongoURI = 'mongodb+srv://aniket:1q2w3e4r5t@cluster0.2dal9.mongodb.net/bck?retryWrites=true&w=majority';
 
 
 
@@ -319,14 +319,6 @@ app.post('/login', async (req, res) => {
     return res.send({ message: 'Please provide email and password',status:"404" });
   }
 
-  // Find the user by email address in your database or data source
-//    const search= await FormModelss.findOne({email:email})
-//   if(!search ){
-//     res.send({
-//         message:"please enter valid email",
-//         status:"404"
-//     })
-// }
 const validEmail = 'prakashaniket3@gmail.com';
 const validPassword = 'password12345';
 
