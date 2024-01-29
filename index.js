@@ -56,7 +56,7 @@ mongoose.connect(mongoURI, {
 
 app.get('/', (req, res) => {
 
-    res.send('Hello World Aniket boss!')
+    res.send('Alok Weds Simran')
   })
   app.get('/check', (req, res) => {
       req.session.destroy()
