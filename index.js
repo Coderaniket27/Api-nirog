@@ -53,7 +53,7 @@ function authenticate(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  res.send("Alok Weds Simran");
+  res.send("Alok Weds %%%%%");
 });
 app.get("/check", (req, res) => {
   req.session.destroy();
