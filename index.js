@@ -77,195 +77,83 @@ app.post("/logout", (req, res) => {
     });
   }
 });
-app.post("/register", async (req, res, next) => {
-  console.log(req.body);
-
-  const { name, phone, email, address, query } = req.body;
-
-  if (!name || !phone || !address || !query) {
-    return res.send({
-      status: 400,
-      message: "Missing data",
-      data: req.body,
-    });
-  }
-  if (query.length != 8) {
-    return res.send({
-      status: 400,
-      message: "Please enter Valid Aadhar",
-      data: req.body,
-    });
-  }
-
-  // Write into DB
-  try {
-    let Aadhar = req.body.query;
-    let phone = req.body.phone;
-
-    let formDs = await FormModel.findOne({ phone: phone } || { query: Aadhar });
-
-    if (formDs) {
-      return res.send({
-        status: 401,
-        message: "Aadhar or phone  already taken please use another",
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    return res.send({
-      status: 400,
-      message: "Database   error",
-      error: err,
-    });
-  }
-  let formData = new FormModel({
-    name: name,
-
-    phone: phone,
-    query: query,
-    address: address,
-  });
-
-  if (email) formData.email = email;
-  try {
-    let formDb = await formData.save();
-
-    console.log(formDb);
-
-    res.send({
-      status: 200,
-      message: "Form Submmitted Successfully",
-      pata: formDb,
-    });
-  } catch (err) {
-    console.log(err);
-    res.send({
-      status: 400,
-      message: "Database error hai deho",
-      error: err,
-    });
-  }
-});
-app.post("/cardregister", authenticate, async (req, res) => {
-  console.log(req.body);
-  const { name, phone, email, address, aadhar, pincode, date, member } =
-    req.body;
-  try {
-    if (!name || !phone || !address || !aadhar || !date || !member) {
-      return res.send({
-        status: 400,
-        message: "Missing data hai",
-        data: req.body,
-      });
-    }
-
-    if (aadhar.length != "12") {
-      return res.send({
-        status: 400,
-        message: "Invalid aadhar no",
-        data: req.body,
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    res.send({
-      status: 400,
-      message: "Database error hai deho",
-      error: err,
-    });
-  }
-  // Write into DB
-  try {
-    let aadhar = req.body.aadhar;
-    let member = req.body.member;
-
-    let formDs = await FormModel.findOne({ aadhar: aadhar });
-
-    if (formDs) {
-      return res.send({
-        status: 401,
-        message: " Aadhar  already Registered",
-      });
-    }
-    let formMember = await FormModel.findOne({ member: member });
-    if (formMember) {
-      return res.send({
-        status: 401,
-        message: " membership ID already Registered",
-      });
-    }
-  } catch (err) {
-    console.log(err);
-    return res.send({
-      status: 400,
-      message: "Database   error",
-      error: err,
-    });
-  }
-  let formData = new FormModel({
-    name: name,
-    pincode: pincode,
-    phone: phone,
-    aadhar: aadhar,
-    address: address,
-    date: date,
-    email: email,
-    member: member,
-  });
+app.post("/cardregister",  async (req, res) => {
+  const { name, phone, email, address, aadhar, pincode, date, member, familyMembers } = req.body;
 
   try {
-    let formDb = await formData.save();
+      // Validate required fields
+      if (!name || !phone || !email || !address || !aadhar || !date || !member) {
+          return res.status(400).send({
+              message: "Missing data hai",
+              data: req.body,
+          });
+      }
 
-    console.log(formDb);
+      // Validate Aadhar number length
+      if (aadhar.length !== 12) {
+          return res.status(400).send({
+              message: "Invalid Aadhar number",
+              data: req.body,
+          });
+      }
 
-    res.send({
-      status: "200",
-      message: "Form Submmitted Successfully",
-      pata: formDb,
-    });
+      // Check for existing entries
+      const existingUser = await FormModel.findOne({ 
+          $or: [{ aadhar }, { phone }, { email }, { member }]
+      });
+
+      if (existingUser) {
+          return res.status(401).send({
+              message: "Aadhar, phone, email, or membership ID already registered",
+          });
+      }
+
+      // Check family members' Aadhar numbers
+      if (familyMembers && familyMembers.length > 0) {
+          for (let i = 0; i < familyMembers.length; i++) {
+              const familyAadhar = familyMembers[i].familyAadhar;
+
+              if (familyAadhar) {
+                  const existingFamilyMember = await FormModel.findOne({ "familyMembers.familyAadhar": familyAadhar });
+                  console.log(existingFamilyMember,"ko")
+                  if (existingFamilyMember) {
+                      return res.status(401).send({
+                          message: `Family member's Aadhar number at index ${i} is already registered`,
+                      });
+                  }
+              }
+          }
+      }
+
+      // Save the new form data
+      const formData = new FormModel({
+          name,
+          pincode,
+          phone,
+          email,
+          address,
+          aadhar,
+          date,
+          member,
+          familyMembers,
+      });
+
+      const savedForm = await formData.save();
+
+      res.status(200).send({
+          message: "Form submitted successfully",
+          data: savedForm,
+      });
+
   } catch (err) {
-    console.log(err);
-    res.send({
-      status: 400,
-      message: "Database error ",
-      error: err,
-    });
+      console.log(err);
+      res.status(500).send({
+          message: "Database error",
+          error: err,
+      });
   }
 });
 
-// app.post('/update', async(req, res) => {
-//     let phone = req.body.phone;
-//     let newData = req.body.newData;
-//     console.log(req.body)
-
-//     try {
-
-//         let oldData = await FormModel.findOneAndUpdate({phone: phone}, newData);
-//         console.log(oldData)
-// console.log(newData)
-// if(oldData){
-//        return  res.send({
-//             status: 200,
-//             message: "Updated data successfully bro",
-//             data: oldData
-//         })
-//     }
-//     else{
-//         return res.send({
-//             message:"enter data",
-//             status:400
-//         })
-//     }
-// }
-
-//     catch(err) {
-//         res.send({
-//             status: 400,
-//             message: "Database Error",
-//             error: err
-//         })
-//     }
-//   })
 app.post("/login", async (req, res) => {
   // You should validate the user's credentials before generating the token
 
